@@ -1,28 +1,83 @@
 #pragma once
-
 #include "Processor.h"
-
+/* 
+	First i go through the list and delete all the elements that we can't use to build the list. 
+	Then i add the missing elements. 
+	Thus, we spend a maximum of O(originalListSize + newListSize) = O(max(n, m)) operations.
+	Budniak Eduard 2018
+*/
 namespace DiffProcessor
 {
 	Processor::Processor(long limit)
 	{
-		// TODO: initialization.
+		this->limit = limit;
 	}
 	Processor::~Processor()
 	{
-		// TODO: Free resources.
+		// Compiler will clear all 
 	}
 
 	void Processor::do_process(SortedLimitedList<double> &must_be_equal_to, const SortedLimitedList<double> &expected_output)
 	{
-		// TODO: make "must_be_equal_to" list equal to "expected_output".
-		// 0. Processor will be created once and then will be used billion times. 
-		// 1. Use methods: AddFirst, AddLast, AddBefore, AddAfter, Remove to modify list.
-		// 2. Do not change expected_output list.
-		// 3. At any time number of elements in list could not exceed the "Limit". 
-		// 4. "Limit" will be passed into Processor's constructor. All "must_be_equal_to" and "expected_output" lists will have the same "Limit" value.
-		// 5. At any time list elements must be in non-descending order.
-		// 6. Implementation must perform minimal possible number of actions (AddFirst, AddLast, AddBefore, AddAfter, Remove).
-		// 7. Implementation must be fast and do not allocate excess memory.
+		
+		// Limit checking 
+		if(expected_output.count() > limit || must_be_equal_to.count() > limit)
+			throw std::invalid_argument("Limit exceeded!");
+		// Two useful pointers
+		SortedLimitedList<double>::iterator currentElement = must_be_equal_to.first(), nextElement = (must_be_equal_to.first()++);
+		// Go left on right removing useless garbage from the original list
+		for(SortedLimitedList<double>::const_iterator it = expected_output.first(); it != expected_output.end(); it++)
+		{
+			while(currentElement != must_be_equal_to.end() && *currentElement < *it)
+			{
+				must_be_equal_to.remove(currentElement);
+				currentElement = nextElement;
+				if(nextElement != must_be_equal_to.end())
+					nextElement++;
+			}
+			
+			if(currentElement == must_be_equal_to.end())
+			{
+				break;
+			}
+			
+			if(*currentElement == *it)
+			{
+				currentElement = nextElement;
+				if(nextElement != must_be_equal_to.end())
+					nextElement++;
+			}
+		}
+
+		// Deleting too big elements
+		while(currentElement != must_be_equal_to.end())
+		{
+			must_be_equal_to.remove(currentElement);
+			currentElement = nextElement;
+			if(nextElement != must_be_equal_to.end())
+				nextElement++;
+		}
+
+		currentElement = must_be_equal_to.first();
+		// Here we insert the elements which were not in the original list
+		for(SortedLimitedList<double>::const_iterator it = expected_output.first(); it != expected_output.end(); it++)
+		{
+			if(currentElement == must_be_equal_to.end())
+			{
+				must_be_equal_to.add_last(*it);
+				currentElement = must_be_equal_to.end();
+			}
+			else
+			{
+				if(*currentElement > *it)
+				{
+					must_be_equal_to.add_before(currentElement, *it);
+				}
+				else
+				{
+					currentElement++;
+				}
+			}
+		}
 	}
 };
