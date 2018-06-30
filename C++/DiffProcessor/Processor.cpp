@@ -23,11 +23,15 @@ namespace DiffProcessor
 		// Limit checking 
 		if(expected_output.count() > limit || must_be_equal_to.count() > limit)
 			throw std::invalid_argument("Limit exceeded!");
-		// Two useful pointers
-		SortedLimitedList<double>::iterator currentElement = must_be_equal_to.first(), nextElement = (must_be_equal_to.first()++);
-		// Go left on right removing useless garbage from the original list
+
+		// I will use two pointers to pass through list
+		auto currentElement = must_be_equal_to.first(), nextElement = (must_be_equal_to.first()++);
+
+		// Go left-to-right removing useless garbage
+
 		for(SortedLimitedList<double>::const_iterator it = expected_output.first(); it != expected_output.end(); it++)
 		{
+			// if current element less than it we can't use 
 			while(currentElement != must_be_equal_to.end() && *currentElement < *it)
 			{
 				must_be_equal_to.remove(currentElement);
@@ -41,6 +45,7 @@ namespace DiffProcessor
 				break;
 			}
 			
+			// Check if we can use it 
 			if(*currentElement == *it)
 			{
 				currentElement = nextElement;
